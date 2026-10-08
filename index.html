@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Checklist Cocina · Chilaquería HMO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0b0b; --card:#171717; --card2:#1f1f1f; --line:#2c2c2c;
+  --y:#FFD400; --y2:#ffe566; --text:#ffffff; --dim:#a8a8a8; --red:#ff5a4f;
+  --head:'Barlow Condensed','Arial Narrow',Impact,sans-serif;
+  --body:'Barlow','Segoe UI',Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html{scroll-padding-top:120px}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-weight:700;font-size:18px;line-height:1.25;padding-bottom:env(safe-area-inset-bottom)}
+button,input,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--head);text-transform:uppercase;margin:0;letter-spacing:.02em}
+
+/* Header */
+.top{position:sticky;top:0;z-index:20;background:#000;border-bottom:4px solid var(--y);padding-top:env(safe-area-inset-top)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;max-width:1100px;margin:0 auto}
+.brand{font-family:var(--head);font-weight:800;font-size:26px;color:var(--y);letter-spacing:.04em;line-height:1}
+.brand span{display:inline-block;margin-left:6px;background:var(--y);color:#000;font-size:14px;padding:2px 6px;border-radius:4px;vertical-align:middle}
+.clock{text-align:right;line-height:1.05}
+#clkTime{font-family:var(--head);font-size:26px;font-weight:800;color:var(--y)}
+#clkDate{font-size:12px;text-transform:uppercase;color:var(--dim);letter-spacing:.04em}
+.prog{max-width:1100px;margin:0 auto;padding:0 14px 10px}
+.prog-text{display:flex;justify-content:space-between;font-size:14px;text-transform:uppercase;margin-bottom:5px}
+.prog-bar{height:12px;background:#2a2a2a;border-radius:99px;overflow:hidden}
+.prog-bar i{display:block;height:100%;width:0;background:var(--y);transition:width .25s}
+
+main{max-width:1100px;margin:0 auto;padding:16px 14px 40px}
+
+/* Start */
+.hero h1{font-size:44px;font-weight:800;line-height:.95;color:var(--y);margin:10px 0 6px}
+.hero p{color:var(--dim);margin:0 0 18px;font-size:16px}
+label.fld{display:block;font-family:var(--head);text-transform:uppercase;font-size:20px;margin-bottom:6px;letter-spacing:.04em}
+.input{width:100%;background:#000;border:3px solid var(--y);border-radius:12px;padding:14px;font-size:20px;font-weight:700;outline:none}
+.input:focus{box-shadow:0 0 0 4px rgba(255,212,0,.3)}
+.shifts{display:grid;gap:14px;margin-top:20px;grid-template-columns:1fr}
+.shift{display:block;width:100%;text-align:left;background:var(--card);border:3px solid var(--y);border-radius:16px;padding:18px;cursor:pointer;transition:transform .08s,background .15s}
+.shift:active{transform:scale(.98);background:var(--y);color:#000}
+.shift:active .s-sub,.shift:active .s-tag{color:#000}
+.shift .s-name{font-family:var(--head);font-size:40px;font-weight:800;text-transform:uppercase;color:var(--y);line-height:1}
+.shift:active .s-name{color:#000}
+.shift .s-sub{font-size:16px;color:var(--text);margin-top:6px}
+.shift .s-tag{font-size:14px;color:var(--dim);margin-top:8px;text-transform:uppercase}
+.shift.suggest::after{content:"Sugerido por la hora";display:inline-block;margin-top:8px;background:var(--y);color:#000;font-size:12px;padding:3px 8px;border-radius:99px;text-transform:uppercase}
+
+/* List */
+.toprow{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap}
+.who{font-size:16px;color:var(--dim);text-transform:uppercase}
+.who b{color:var(--y)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:3px solid var(--y);background:transparent;color:var(--y);border-radius:12px;padding:12px 16px;font-family:var(--head);font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;cursor:pointer;min-height:52px}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--y);color:#000}
+.btn.small{font-size:16px;min-height:42px;padding:8px 12px}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.block-title{font-size:28px;font-weight:800;background:var(--y);color:#000;padding:8px 12px;border-radius:10px;margin:22px 0 12px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(330px,1fr))}
+.group{background:var(--card);border:2px solid var(--line);border-radius:14px;overflow:hidden}
+.group h3{display:flex;justify-content:space-between;align-items:center;font-size:22px;font-weight:800;color:var(--y);padding:10px 12px;border-bottom:2px solid var(--line);background:var(--card2)}
+.group h3 em{font-style:normal;font-size:16px;color:var(--dim)}
+.group h3 em.full{color:var(--y)}
+.item{position:relative;display:flex;align-items:center;gap:12px;padding:12px;min-height:58px;border-bottom:1px solid var(--line);cursor:pointer}
+.item:last-child{border-bottom:0}
+.item input{position:absolute;opacity:0;width:1px;height:1px}
+.box{flex:0 0 36px;width:36px;height:36px;border:3px solid var(--y);border-radius:8px;background:#000;position:relative;transition:background .12s}
+.box::after{content:"";position:absolute;left:10px;top:3px;width:10px;height:19px;border:solid #000;border-width:0 5px 5px 0;transform:rotate(45deg) scale(0);transition:transform .12s}
+.item input:checked + .box{background:var(--y)}
+.item input:checked + .box::after{transform:rotate(45deg) scale(1)}
+.item input:focus-visible + .box{box-shadow:0 0 0 4px rgba(255,212,0,.45)}
+.txt{flex:1;font-size:18px}
+.item input:checked ~ .txt{color:#bdbdbd}
+.tm{font-family:var(--head);font-size:18px;color:var(--y);min-width:48px;text-align:right}
+
+.panel{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:14px;margin-top:22px}
+.panel h2{font-size:26px;color:var(--y);margin-bottom:10px}
+textarea.input{min-height:120px;resize:vertical;font-size:18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.chip{background:#000;border:2px solid var(--y);color:var(--y);border-radius:99px;padding:8px 12px;font-size:15px;cursor:pointer}
+.chip:active{background:var(--y);color:#000}
+.sigwrap{background:#fffbe0;border:3px solid var(--y);border-radius:12px;position:relative}
+#sig{display:block;width:100%;height:150px;touch-action:none;border-radius:10px}
+.sig-hint{position:absolute;left:12px;bottom:8px;font-size:13px;color:#8a7d1a;pointer-events:none;text-transform:uppercase}
+.note{font-size:15px;color:var(--dim);margin:12px 0 0}
+.actions{display:grid;gap:12px;margin-top:22px;grid-template-columns:1fr}
+.reset{margin-top:26px;text-align:center}
+.reset button{background:none;border:0;color:var(--dim);text-decoration:underline;font-size:15px;cursor:pointer;padding:10px}
+
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translate(-50%,30px);background:var(--y);color:#000;padding:12px 18px;border-radius:12px;font-weight:800;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:92vw;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media(min-width:700px){
+  .shifts{grid-template-columns:1fr 1fr}
+  .actions{grid-template-columns:repeat(3,1fr)}
+  .hero h1{font-size:60px}
+}
+
+/* ---------- Reporte exportable (fuera de pantalla) ---------- */
+#report{position:fixed;left:-12000px;top:0;width:820px;background:#fff;color:#111;font-family:var(--body);font-weight:700;font-size:16px}
+#report *{box-sizing:border-box}
+.r-head{background:#000;color:var(--y);padding:22px 28px;border-bottom:8px solid var(--y)}
+.r-brand{font-family:var(--head);font-weight:800;font-size:34px;letter-spacing:.05em;line-height:1}
+.r-brand small{background:var(--y);color:#000;font-size:16px;padding:2px 8px;border-radius:4px;margin-left:8px;vertical-align:middle}
+.r-title{font-family:var(--head);font-weight:800;font-size:46px;text-transform:uppercase;color:#fff;margin-top:8px;line-height:1}
+.r-meta{display:grid;grid-template-columns:1fr 1fr;border-bottom:3px solid #000}
+.r-meta div{padding:10px 28px;border-bottom:1px solid #ddd}
+.r-meta div:nth-child(odd){border-right:1px solid #ddd}
+.r-meta b{display:block;font-size:12px;text-transform:uppercase;color:#777;letter-spacing:.06em}
+.r-meta span{font-size:19px}
+.r-sum{padding:14px 28px;background:var(--y);color:#000;font-family:var(--head);font-weight:800;font-size:28px;text-transform:uppercase;display:flex;justify-content:space-between}
+.r-body{padding:6px 28px 8px}
+.r-block{font-family:var(--head);font-weight:800;font-size:26px;text-transform:uppercase;background:#000;color:var(--y);padding:6px 12px;margin:18px 0 4px}
+.r-group{font-family:var(--head);font-weight:800;font-size:21px;text-transform:uppercase;border-bottom:3px solid var(--y);margin:12px 0 2px;padding-bottom:2px}
+.r-item{display:flex;align-items:center;gap:12px;padding:5px 4px;border-bottom:1px solid #e6e6e6;font-size:16px}
+.r-item .b{flex:0 0 22px;width:22px;height:22px;border:2.5px solid #000;border-radius:4px;text-align:center;line-height:17px;font-size:18px;font-weight:800}
+.r-item.ok .b{background:var(--y)}
+.r-item .t{flex:1}
+.r-item .h{font-family:var(--head);font-size:16px;color:#555;min-width:80px;text-align:right}
+.r-item.no{background:#fff1f0}
+.r-item.no .h{color:#c0211a;font-weight:800}
+.r-sec{padding:6px 28px 10px}
+.r-sec h4{font-family:var(--head);font-weight:800;font-size:24px;text-transform:uppercase;background:#000;color:var(--y);padding:6px 12px;margin:14px 0 8px}
+.r-comment{border:2px solid #000;padding:12px;min-height:56px;white-space:pre-wrap;word-break:break-word;font-size:17px}
+.r-sig{border:2px solid #000;height:130px;display:flex;align-items:center;justify-content:center;background:#fffbe0}
+.r-sig img{max-height:120px;max-width:100%}
+.r-foot{padding:10px 28px 18px;font-size:12px;color:#777;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="bar">
+    <div class="brand">CHILAQUERÍA<span>HMO</span></div>
+    <div class="clock"><div id="clkTime">--:--</div><div id="clkDate"></div></div>
+  </div>
+  <div class="prog" id="progWrap" hidden>
+    <div class="prog-text"><span id="progLabel"></span><span id="progPct"></span></div>
+    <div class="prog-bar"><i id="progFill"></i></div>
+  </div>
+</header>
+
+<main>
+  <!-- PANTALLA 1: turno -->
+  <section id="screenStart">
+    <div class="hero">
+      <h1>Checklist de cocina</h1>
+      <p>Elige tu turno y marca tus tareas. Al final genera la hoja y mándala al grupo.</p>
+    </div>
+    <label class="fld" for="nameInput">Tu nombre</label>
+    <input id="nameInput" class="input" type="text" autocomplete="given-name" placeholder="Ej. Omar" maxlength="40">
+    <div class="shifts">
+      <button class="shift" id="btnManana" type="button">
+        <div class="s-name">Turno mañana</div>
+        <div class="s-sub">Apertura 7:00 AM + limpieza de apertura</div>
+        <div class="s-tag" id="tagManana"></div>
+      </button>
+      <button class="shift" id="btnTarde" type="button">
+        <div class="s-name">Turno tarde</div>
+        <div class="s-sub">Desde las 12:00 PM · checklist de cierre 7:00 PM + limpieza</div>
+        <div class="s-tag" id="tagTarde"></div>
+      </button>
+    </div>
+  </section>
+
+  <!-- PANTALLA 2: lista -->
+  <section id="screenList" hidden>
+    <div class="toprow">
+      <button class="btn small" id="btnBack" type="button">← Cambiar turno</button>
+      <div class="who" id="whoLine"></div>
+    </div>
+
+    <div id="blocks"></div>
+
+    <div class="panel">
+      <h2>Comentarios</h2>
+      <div class="chips">
+        <button class="chip" type="button" data-add="Se terminó: ">Se terminó…</button>
+        <button class="chip" type="button" data-add="Falta pedir: ">Falta pedir…</button>
+        <button class="chip" type="button" data-add="Equipo con falla: ">Equipo con falla…</button>
+        <button class="chip" type="button" id="chipManana" data-add="Falta preparar para mañana: " hidden>Falta para mañana…</button>
+      </div>
+      <textarea id="comment" class="input" placeholder="Ej. Se terminaron los tomates, por si gustan pedir más."></textarea>
+    </div>
+
+    <div class="panel">
+      <h2>Firma</h2>
+      <div class="sigwrap">
+        <canvas id="sig"></canvas>
+        <div class="sig-hint">Firma con el dedo</div>
+      </div>
+      <div style="margin-top:10px"><button class="btn small" id="btnSigClear" type="button">Borrar firma</button></div>
+      <p class="note">La jornada se considera terminada cuando todas las tareas asignadas están revisadas y marcadas. Si una tarea requiere atención antes del horario indicado, se hace en el momento.</p>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="btnShare" type="button">Compartir hoja</button>
+      <button class="btn" id="btnPng" type="button">Descargar PNG</button>
+      <button class="btn" id="btnPdf" type="button">Descargar PDF</button>
+    </div>
+
+    <div class="reset"><button id="btnReset" type="button">Reiniciar checklist de hoy</button></div>
+  </section>
+</main>
+
+<div id="report" aria-hidden="true"></div>
+<div id="toast" role="status"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ================= DATOS ================= */
+const DURANTE = [
+  "Mantener mesas de trabajo limpias y despejadas",
+  "Limpiar derrames inmediatamente",
+  "Mantener tarja y utensilios en orden",
+  "Retirar basura cuando sea necesario",
+  "Mantener pisos libres de residuos"
+];
+const SALSAS = ["Salsa roja lista","Salsa verde lista","Salsa poblana lista","Salsa chipotle lista"];
+const MONTADO = ["Totopos con su medida","Frijoles calientes","Queso listo","Media crema lista","Cilantro lavado y picado","Cebolla morada","Aguacate"];
+const PROTEINAS = ["Pollo disponible","Tocino disponible","Barbacoa disponible","Camarón disponible (pelado)","Tamales calientes y disponibles"];
+const PRODUCCION = ["Caldo sopa de tortilla","Chiles poblanos tatemados","Chiles verdes tatemados (rajas)","Glaseado","Salsa picante","Barbacoa","Papas en cubo (home fries)","Mezcla pancakes","Fresa lista","Aderezo chipotle"];
+
+const SHIFTS = {
+  manana: {
+    label: "Mañana",
+    blocks: [
+      { title: "Checklist de apertura · 7:00 AM", groups: [
+        { name: "Salsas", items: SALSAS },
+        { name: "Mesa de montado", items: MONTADO },
+        { name: "Proteínas", items: PROTEINAS },
+        { name: "Producción anticipada", items: [...PRODUCCION, "Producción de frijoles (si falta)"] },
+        { name: "Chequeo completo", items: [
+          "Revisar fecha de producción",
+          "Revisar cantidades de cada producción",
+          "Revisar pan en buen estado y cantidades",
+          "Probar salsas y producción en general"
+        ]}
+      ]},
+      { title: "Limpieza · Apertura", groups: [
+        { name: "Apertura", items: [
+          "Revisar y limpiar los 3 refrigeradores",
+          "Revisar y ordenar el congelador",
+          "Limpiar y preparar la plancha grande",
+          "Limpiar la plancha chica",
+          "Revisar y limpiar la estufa de 6 quemadores",
+          "Revisar la freidora de 2 canastas",
+          "Limpiar y ordenar las mesas de trabajo",
+          "Revisar baño María con 6 insertos",
+          "Revisar campana y retirar grasa visible",
+          "Limpiar y organizar la tarja",
+          "Acomodar y limpiar los 4 estantes",
+          "Revisar paredes y retirar salpicaduras",
+          "Barrer y revisar pisos",
+          "Revisar botes de basura"
+        ]},
+        { name: "Durante servicio", items: DURANTE }
+      ]}
+    ]
+  },
+  tarde: {
+    label: "Tarde",
+    blocks: [
+      { title: "Checklist de cierre · 7:00 PM", groups: [
+        { name: "Salsas", items: SALSAS },
+        { name: "Mesa de montado", items: MONTADO },
+        { name: "Proteínas", items: PROTEINAS },
+        { name: "Producción anticipada", items: PRODUCCION },
+        { name: "Chequeo final", items: [
+          "Almacenar perfectamente toda la producción",
+          "Revisar fecha de producción",
+          "Revisar cantidades de cada producción",
+          "Revisar pan en buen estado y cantidades",
+          "Probar salsas y producción en general",
+          "Descongelar producción con anticipación"
+        ]}
+      ]},
+      { title: "Limpieza · Durante servicio", groups: [
+        { name: "Durante servicio", items: DURANTE }
+      ]},
+      { title: "Limpieza · Cierre", groups: [
+        { name: "Cierre", items: [
+          "Limpiar y ordenar los 3 refrigeradores",
+          "Revisar y ordenar el congelador",
+          "Hacer limpieza profunda de la plancha grande",
+          "Hacer limpieza profunda de la plancha chica",
+          "Limpiar la estufa de 6 quemadores",
+          "Limpiar y dejar lista la freidora de 2 canastas",
+          "Lavar y desinfectar las mesas de trabajo",
+          "Vaciar, lavar y ordenar baño María y sus 6 insertos",
+          "Limpiar superficies accesibles de la campana",
+          "Lavar y dejar limpia la tarja",
+          "Limpiar y ordenar los 4 estantes",
+          "Limpiar salpicaduras de paredes",
+          "Barrer y trapear pisos",
+          "Vaciar y limpiar los botes de basura",
+          "Dejar toda la cocina ordenada para el turno de mañana"
+        ]}
+      ]}
+    ]
+  }
+};
+
+/* ================= HELPERS ================= */
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2,'0');
+const isoDate = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const hm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const longDate = d => d.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+function forEachItem(shiftKey, fn){
+  SHIFTS[shiftKey].blocks.forEach((blk,b)=>blk.groups.forEach((g,gi)=>g.items.forEach((text,i)=>fn(`${shiftKey}.${b}.${gi}.${i}`, text, blk, g))));
+}
+function totalItems(shiftKey){ let n=0; forEachItem(shiftKey,()=>n++); return n; }
+
+let toastTimer;
+function toast(msg){
+  const t=$('#toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+/* ================= ESTADO ================= */
+let shift=null, state=null, startDate=null;
+const keyFor = (date,s) => `chk:${date}:${s}`;
+function loadFor(date,s){ try{ return JSON.parse(localStorage.getItem(keyFor(date,s))) || null; }catch(e){ return null; } }
+function save(){ try{ localStorage.setItem(keyFor(startDate,shift), JSON.stringify(state)); }catch(e){} }
+function cleanOld(){
+  try{
+    const cut=new Date(); cut.setDate(cut.getDate()-14); const cutISO=isoDate(cut);
+    Object.keys(localStorage).forEach(k=>{
+      const m=k.match(/^chk:(\d{4}-\d{2}-\d{2}):/);
+      if(m && m[1]<cutISO) localStorage.removeItem(k);
+    });
+  }catch(e){}
+}
+
+/* ================= RELOJ ================= */
+function tick(){
+  const d=new Date();
+  $('#clkTime').textContent = `${hm(d)}`;
+  $('#clkDate').textContent = d.toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  if(shift && startDate && isoDate(d)!==startDate){
+    toast('Cambió el día. Elige tu turno de nuevo.');
+    showStart();
+  }
+}
+setInterval(tick,15000);
+
+/* ================= INICIO ================= */
+function showStart(){
+  shift=null; state=null; startDate=null;
+  $('#screenStart').hidden=false; $('#screenList').hidden=true; $('#progWrap').hidden=true;
+  const today=isoDate(new Date());
+  [['manana','#tagManana','#btnManana'],['tarde','#tagTarde','#btnTarde']].forEach(([s,tag,btn])=>{
+    const st=loadFor(today,s); const n=st?Object.keys(st.checks||{}).length:0;
+    $(tag).textContent = n ? `Avance de hoy: ${n}/${totalItems(s)}` : 'Sin iniciar hoy';
+    $(btn).classList.toggle('suggest', (s==='manana') === (new Date().getHours()<12));
+  });
+  let nm=''; try{ nm=localStorage.getItem('cfg:name')||''; }catch(e){}
+  if(!$('#nameInput').value) $('#nameInput').value=nm;
+  window.scrollTo(0,0);
+  tick();
+}
+
+function pickShift(s){
+  const name=$('#nameInput').value.trim();
+  if(!name){ $('#nameInput').focus(); toast('Escribe tu nombre para continuar'); return; }
+  try{ localStorage.setItem('cfg:name',name); }catch(e){}
+  shift=s; startDate=isoDate(new Date());
+  state=loadFor(startDate,s) || {checks:{},comment:'',sig:null};
+  state.name=name;
+  save();
+  showList();
+}
+
+/* ================= LISTA ================= */
+function showList(){
+  $('#screenStart').hidden=true; $('#screenList').hidden=false; $('#progWrap').hidden=false;
+  $('#whoLine').innerHTML = `Turno <b>${esc(SHIFTS[shift].label)}</b> · <b>${esc(state.name)}</b>`;
+  renderBlocks();
+  $('#comment').value = state.comment || '';
+  $('#chipManana').hidden = shift!=='tarde';
+  $('#comment').placeholder = shift==='tarde' ? 'Avisa qué falta preparar o pedir para mañana. Ej. Falta hacer salsa roja; se terminaron los tomates.' : 'Ej. Se terminaron los tomates, por si gustan pedir más.';
+  window.scrollTo(0,0);
+  requestAnimationFrame(sizeSig);
+  updateProgress();
+}
+
+function renderBlocks(){
+  const root=$('#blocks'); root.innerHTML='';
+  SHIFTS[shift].blocks.forEach((blk,b)=>{
+    const h=document.createElement('h2'); h.className='block-title'; h.textContent=blk.title; root.appendChild(h);
+    const grid=document.createElement('div'); grid.className='grid';
+    blk.groups.forEach((g,gi)=>{
+      const sec=document.createElement('section'); sec.className='group'; sec.dataset.gid=`${b}.${gi}`;
+      const hd=document.createElement('h3'); hd.innerHTML=`<span>${esc(g.name)}</span><em></em>`; sec.appendChild(hd);
+      g.items.forEach((text,i)=>{
+        const id=`${shift}.${b}.${gi}.${i}`;
+        const lab=document.createElement('label'); lab.className='item';
+        lab.innerHTML=`<input type="checkbox" data-id="${id}"><span class="box"></span><span class="txt">${esc(text)}</span><span class="tm"></span>`;
+        const inp=lab.querySelector('input'), tm=lab.querySelector('.tm');
+        if(state.checks[id]){ inp.checked=true; tm.textContent=state.checks[id]; }
+        inp.addEventListener('change',()=>{
+          if(inp.checked){ state.checks[id]=hm(new Date()); tm.textContent=state.checks[id]; }
+          else { delete state.checks[id]; tm.textContent=''; }
+          save(); updateProgress();
+        });
+        sec.appendChild(lab);
+      });
+      grid.appendChild(sec);
+    });
+    root.appendChild(grid);
+  });
+}
+
+function updateProgress(){
+  const total=totalItems(shift), done=Object.keys(state.checks).length;
+  const pct=total?Math.round(done/total*100):0;
+  $('#progLabel').textContent=`${done} de ${total} tareas`;
+  $('#progPct').textContent=`${pct}%`;
+  $('#progFill').style.width=pct+'%';
+  document.querySelectorAll('.group').forEach(sec=>{
+    const boxes=sec.querySelectorAll('input'); let c=0; boxes.forEach(x=>{ if(x.checked) c++; });
+    const em=sec.querySelector('h3 em'); em.textContent=`${c}/${boxes.length}`; em.classList.toggle('full', c===boxes.length);
+  });
+}
+
+/* comentarios */
+$('#comment').addEventListener('input',e=>{ if(state){ state.comment=e.target.value; save(); } });
+document.querySelectorAll('.chip').forEach(ch=>ch.addEventListener('click',()=>{
+  const ta=$('#comment'); const add=ch.dataset.add;
+  ta.value = ta.value ? ta.value.replace(/\s*$/,'') + '\n' + add : add;
+  ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length);
+  state.comment=ta.value; save();
+}));
+
+/* firma */
+const sig=$('#sig'), sctx=sig.getContext('2d'); let drawing=false;
+function sizeSig(){
+  const r=sig.getBoundingClientRect(); if(!r.width) return;
+  const dpr=window.devicePixelRatio||1;
+  sig.width=Math.round(r.width*dpr); sig.height=Math.round(r.height*dpr);
+  sctx.setTransform(dpr,0,0,dpr,0,0);
+  sctx.lineWidth=3; sctx.lineCap='round'; sctx.lineJoin='round'; sctx.strokeStyle='#000';
+  if(state && state.sig){ const img=new Image(); img.onload=()=>sctx.drawImage(img,0,0,r.width,r.height); img.src=state.sig; }
+}
+function pos(e){ const r=sig.getBoundingClientRect(); return {x:e.clientX-r.left,y:e.clientY-r.top}; }
+sig.addEventListener('pointerdown',e=>{ drawing=true; sig.setPointerCapture(e.pointerId); const p=pos(e); sctx.beginPath(); sctx.moveTo(p.x,p.y); sctx.lineTo(p.x+0.1,p.y+0.1); sctx.stroke(); });
+sig.addEventListener('pointermove',e=>{ if(!drawing) return; const p=pos(e); sctx.lineTo(p.x,p.y); sctx.stroke(); });
+const endSig=()=>{ if(!drawing) return; drawing=false; if(state){ state.sig=sig.toDataURL('image/png'); save(); } };
+sig.addEventListener('pointerup',endSig); sig.addEventListener('pointercancel',endSig);
+$('#btnSigClear').addEventListener('click',()=>{ sctx.clearRect(0,0,sig.width,sig.height); if(state){ state.sig=null; save(); } sizeSig(); });
+window.addEventListener('resize',()=>{ if(!$('#screenList').hidden) sizeSig(); });
+
+/* ================= REPORTE ================= */
+function buildReport(){
+  const now=new Date(), s=SHIFTS[shift];
+  const total=totalItems(shift), done=Object.keys(state.checks).length, pend=total-done;
+  let h=`
+    <div class="r-head"><div class="r-brand">CHILAQUERÍA<small>HMO</small></div><div class="r-title">Checklist · Turno ${esc(s.label)}</div></div>
+    <div class="r-meta">
+      <div><b>Fecha del turno</b><span>${esc(longDate(new Date(startDate+'T12:00:00')))}</span></div>
+      <div><b>Turno</b><span>${esc(s.label)}</span></div>
+      <div><b>Nombre</b><span>${esc(state.name||'')}</span></div>
+      <div><b>Hoja generada</b><span>${esc(longDate(now))} · ${hm(now)}</span></div>
+    </div>
+    <div class="r-sum"><span>${done} de ${total} tareas completadas</span><span>${pend?pend+' pendientes':'Todo completo'}</span></div>
+    <div class="r-body">`;
+  s.blocks.forEach((blk,b)=>{
+    h+=`<div class="r-block">${esc(blk.title)}</div>`;
+    blk.groups.forEach((g,gi)=>{
+      h+=`<div class="r-group">${esc(g.name)}</div>`;
+      g.items.forEach((text,i)=>{
+        const t=state.checks[`${shift}.${b}.${gi}.${i}`];
+        h+=`<div class="r-item ${t?'ok':'no'}"><span class="b">${t?'✓':''}</span><span class="t">${esc(text)}</span><span class="h">${t?esc(t):'PENDIENTE'}</span></div>`;
+      });
+    });
+  });
+  h+=`</div>
+    <div class="r-sec"><h4>Comentarios</h4><div class="r-comment">${state.comment?esc(state.comment):'Sin comentarios.'}</div>
+    <h4>Firma</h4><div class="r-sig">${state.sig?`<img src="${state.sig}" alt="">`:'<span style="color:#999">Sin firma</span>'}</div></div>
+    <div class="r-foot">Enviar checklist generado al WhatsApp grupal</div>`;
+  const r=$('#report'); r.innerHTML=h; return r;
+}
+async function makeCanvas(){
+  if(typeof html2canvas==='undefined') throw new Error('No cargó html2canvas. Revisa tu conexión a internet.');
+  const r=buildReport();
+  if(document.fonts && document.fonts.ready) await document.fonts.ready;
+  return html2canvas(r,{scale:2,backgroundColor:'#ffffff',useCORS:true,logging:false});
+}
+function fileBase(){
+  const nm=(state.name||'cocina').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-|-$/g,'').toLowerCase();
+  return `checklist-${shift}-${startDate}-${nm}`;
+}
+function confirmIncomplete(){
+  const pend=totalItems(shift)-Object.keys(state.checks).length;
+  return pend===0 || confirm(`Te faltan ${pend} tareas por marcar. ¿Generar la hoja de todos modos?`);
+}
+function download(url,name){ const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); }
+function canvasBlob(c){ return new Promise(res=>c.toBlob(res,'image/png')); }
+
+async function withBusy(btn,fn){
+  const old=btn.textContent; btn.disabled=true; btn.textContent='Generando…';
+  try{ await fn(); }catch(e){ if(e && e.name!=='AbortError') toast(e.message||'No se pudo generar la hoja'); }
+  finally{ btn.disabled=false; btn.textContent=old; }
+}
+
+$('#btnPng').addEventListener('click',()=>{ if(!confirmIncomplete()) return; withBusy($('#btnPng'),async()=>{
+  const c=await makeCanvas(); download(c.toDataURL('image/png'), fileBase()+'.png'); toast('PNG descargado');
+});});
+
+$('#btnPdf').addEventListener('click',()=>{ if(!confirmIncomplete()) return; withBusy($('#btnPdf'),async()=>{
+  if(!(window.jspdf && window.jspdf.jsPDF)) throw new Error('No cargó el generador de PDF. Revisa tu conexión.');
+  const c=await makeCanvas();
+  const W=c.width/2*0.75, H=c.height/2*0.75;
+  const pdf=new window.jspdf.jsPDF({unit:'pt',format:[W,H],orientation:H>W?'p':'l'});
+  pdf.addImage(c.toDataURL('image/jpeg',0.92),'JPEG',0,0,W,H);
+  pdf.save(fileBase()+'.pdf'); toast('PDF descargado');
+});});
+
+$('#btnShare').addEventListener('click',()=>{ if(!confirmIncomplete()) return; withBusy($('#btnShare'),async()=>{
+  const c=await makeCanvas(); const blob=await canvasBlob(c);
+  const file=new File([blob], fileBase()+'.png', {type:'image/png'});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    await navigator.share({files:[file], title:`Checklist ${SHIFTS[shift].label} ${startDate}`});
+  }else{
+    download(URL.createObjectURL(blob), fileBase()+'.png');
+    toast('Tu navegador no comparte archivos directo. Se descargó la imagen.');
+  }
+});});
+
+/* ================= EVENTOS GENERALES ================= */
+$('#btnManana').addEventListener('click',()=>pickShift('manana'));
+$('#btnTarde').addEventListener('click',()=>pickShift('tarde'));
+$('#btnBack').addEventListener('click',showStart);
+$('#btnReset').addEventListener('click',()=>{
+  if(!confirm('¿Borrar todo lo marcado, comentarios y firma de este turno de hoy?')) return;
+  state={checks:{},comment:'',sig:null,name:state.name}; save(); showList(); toast('Checklist reiniciado');
+});
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden) tick(); });
+
+cleanOld();
+showStart();
+})();
+</script>
+</body>
+</html>
