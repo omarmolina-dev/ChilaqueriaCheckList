@@ -5,10 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
 <title>Checklist Cocina · Chilaquería HMO</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preload" href="fonts/barlow-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/barlow-condensed-800.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+@font-face{font-family:'Barlow';font-weight:700;font-style:normal;font-display:swap;src:url(fonts/barlow-700.woff2) format('woff2')}
+@font-face{font-family:'Barlow Condensed';font-weight:800;font-style:normal;font-display:swap;src:url(fonts/barlow-condensed-800.woff2) format('woff2')}
 :root{
   --bg:#0b0b0b; --card:#171717; --card2:#1f1f1f; --line:#2c2c2c;
   --y:#FFD400; --y2:#ffe566; --text:#ffffff; --dim:#a8a8a8; --red:#ff5a4f;
@@ -94,6 +98,11 @@ textarea.input{min-height:120px;resize:vertical;font-size:18px}
 .reset{margin-top:26px;text-align:center}
 .reset button{background:none;border:0;color:var(--dim);text-decoration:underline;font-size:15px;cursor:pointer;padding:10px}
 
+#modal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:20px}
+#modal .card{background:var(--card);border:3px solid var(--y);border-radius:16px;padding:20px;max-width:420px;width:100%}
+#modal p{margin:0 0 18px;font-size:20px}
+#modal .row{display:flex;gap:10px}
+#modal .row .btn{flex:1}
 #toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translate(-50%,30px);background:var(--y);color:#000;padding:12px 18px;border-radius:12px;font-weight:800;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:92vw;text-align:center}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 
@@ -212,9 +221,8 @@ textarea.input{min-height:120px;resize:vertical;font-size:18px}
 
 <div id="report" aria-hidden="true"></div>
 <div id="toast" role="status"></div>
+<div id="modal" hidden><div class="card" role="dialog" aria-modal="true"><p id="modalMsg"></p><div class="row"><button class="btn" id="modalNo" type="button">Cancelar</button><button class="btn primary" id="modalYes" type="button">Continuar</button></div></div></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 (function(){
 'use strict';
@@ -312,6 +320,20 @@ const SHIFTS = {
   }
 };
 
+/* ================= CARGA BAJO DEMANDA ================= */
+const LIBS={html2canvas:'vendor/html2canvas.min.js',jspdf:'vendor/jspdf.umd.min.js'};
+const libP={};
+function loadLib(k){
+  if(libP[k]) return libP[k];
+  libP[k]=new Promise((res,rej)=>{
+    const sc=document.createElement('script'); sc.src=LIBS[k]; sc.async=true;
+    sc.onload=res;
+    sc.onerror=()=>{ delete libP[k]; rej(new Error('No se pudo cargar el generador de la hoja. Revisa tu conexión e intenta de nuevo.')); };
+    document.head.appendChild(sc);
+  });
+  return libP[k];
+}
+
 /* ================= HELPERS ================= */
 const $ = s => document.querySelector(s);
 const pad = n => String(n).padStart(2,'0');
@@ -392,6 +414,7 @@ function showList(){
   renderBlocks();
   $('#comment').value = state.comment || '';
   $('#chipManana').hidden = shift!=='tarde';
+  loadLib('html2canvas').catch(()=>{});
   $('#comment').placeholder = shift==='tarde' ? 'Avisa qué falta preparar o pedir para mañana. Ej. Falta hacer salsa roja; se terminaron los tomates.' : 'Ej. Se terminaron los tomates, por si gustan pedir más.';
   window.scrollTo(0,0);
   requestAnimationFrame(sizeSig);
@@ -495,64 +518,91 @@ function buildReport(){
   const r=$('#report'); r.innerHTML=h; return r;
 }
 async function makeCanvas(){
-  if(typeof html2canvas==='undefined') throw new Error('No cargó html2canvas. Revisa tu conexión a internet.');
+  await loadLib('html2canvas');
   const r=buildReport();
   if(document.fonts && document.fonts.ready) await document.fonts.ready;
-  return html2canvas(r,{scale:2,backgroundColor:'#ffffff',useCORS:true,logging:false});
+  const limit=new Promise((_,rej)=>setTimeout(()=>rej(new Error('Tardó demasiado en generar la hoja. Intenta de nuevo.')),30000));
+  return Promise.race([html2canvas(r,{scale:2,backgroundColor:'#ffffff',useCORS:true,logging:false}),limit]);
 }
 function fileBase(){
   const nm=(state.name||'cocina').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-|-$/g,'').toLowerCase();
   return `checklist-${shift}-${startDate}-${nm}`;
 }
-function confirmIncomplete(){
+function ask(msg,yes){
+  return new Promise(res=>{
+    const m=$('#modal'), y=$('#modalYes'), n=$('#modalNo');
+    $('#modalMsg').textContent=msg; y.textContent=yes||'Continuar'; m.hidden=false;
+    const done=v=>{ m.hidden=true; y.onclick=null; n.onclick=null; res(v); };
+    y.onclick=()=>done(true); n.onclick=()=>done(false);
+  });
+}
+async function confirmIncomplete(){
   const pend=totalItems(shift)-Object.keys(state.checks).length;
-  return pend===0 || confirm(`Te faltan ${pend} tareas por marcar. ¿Generar la hoja de todos modos?`);
+  return pend===0 || await ask(`Te faltan ${pend} tareas por marcar. ¿Generar la hoja de todos modos?`,'Generar');
 }
 function download(url,name){ const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); }
 function canvasBlob(c){ return new Promise(res=>c.toBlob(res,'image/png')); }
 
 async function withBusy(btn,fn){
   const old=btn.textContent; btn.disabled=true; btn.textContent='Generando…';
-  try{ await fn(); }catch(e){ if(e && e.name!=='AbortError') toast(e.message||'No se pudo generar la hoja'); }
-  finally{ btn.disabled=false; btn.textContent=old; }
+  const release=()=>{ btn.disabled=false; btn.textContent=old; };
+  const guard=setTimeout(release,35000);
+  try{ await fn(release); }
+  catch(e){ if(!(e && e.name==='AbortError')) toast((e && e.message) || 'No se pudo generar la hoja'); }
+  finally{ clearTimeout(guard); release(); }
+}
+async function run(sel,fn){
+  const btn=$(sel); if(btn.disabled) return;
+  if(!(await confirmIncomplete())) return;
+  await withBusy(btn,fn);
 }
 
-$('#btnPng').addEventListener('click',()=>{ if(!confirmIncomplete()) return; withBusy($('#btnPng'),async()=>{
+$('#btnPng').addEventListener('click',()=>run('#btnPng',async()=>{
   const c=await makeCanvas(); download(c.toDataURL('image/png'), fileBase()+'.png'); toast('PNG descargado');
-});});
+}));
 
-$('#btnPdf').addEventListener('click',()=>{ if(!confirmIncomplete()) return; withBusy($('#btnPdf'),async()=>{
-  if(!(window.jspdf && window.jspdf.jsPDF)) throw new Error('No cargó el generador de PDF. Revisa tu conexión.');
+$('#btnPdf').addEventListener('click',()=>run('#btnPdf',async()=>{
+  await loadLib('jspdf');
   const c=await makeCanvas();
   const W=c.width/2*0.75, H=c.height/2*0.75;
   const pdf=new window.jspdf.jsPDF({unit:'pt',format:[W,H],orientation:H>W?'p':'l'});
-  pdf.addImage(c.toDataURL('image/jpeg',0.92),'JPEG',0,0,W,H);
+  pdf.addImage(c.toDataURL('image/jpeg',0.85),'JPEG',0,0,W,H);
   pdf.save(fileBase()+'.pdf'); toast('PDF descargado');
-});});
+}));
 
-$('#btnShare').addEventListener('click',()=>{ if(!confirmIncomplete()) return; withBusy($('#btnShare'),async()=>{
+$('#btnShare').addEventListener('click',()=>run('#btnShare',async(release)=>{
   const c=await makeCanvas(); const blob=await canvasBlob(c);
-  const file=new File([blob], fileBase()+'.png', {type:'image/png'});
+  const name=fileBase()+'.png';
+  const file=new File([blob], name, {type:'image/png'});
+  release();
   if(navigator.canShare && navigator.canShare({files:[file]})){
-    await navigator.share({files:[file], title:`Checklist ${SHIFTS[shift].label} ${startDate}`});
+    try{ await navigator.share({files:[file], title:`Checklist ${SHIFTS[shift].label} ${startDate}`}); }
+    catch(e){
+      if(e && e.name==='AbortError') return;
+      download(URL.createObjectURL(blob), name);
+      toast('No se pudo abrir el menú de compartir. Se descargó la imagen.');
+    }
   }else{
-    download(URL.createObjectURL(blob), fileBase()+'.png');
+    download(URL.createObjectURL(blob), name);
     toast('Tu navegador no comparte archivos directo. Se descargó la imagen.');
   }
-});});
+}));
 
 /* ================= EVENTOS GENERALES ================= */
 $('#btnManana').addEventListener('click',()=>pickShift('manana'));
 $('#btnTarde').addEventListener('click',()=>pickShift('tarde'));
 $('#btnBack').addEventListener('click',showStart);
-$('#btnReset').addEventListener('click',()=>{
-  if(!confirm('¿Borrar todo lo marcado, comentarios y firma de este turno de hoy?')) return;
+$('#btnReset').addEventListener('click',async()=>{
+  if(!(await ask('¿Borrar todo lo marcado, comentarios y firma de este turno de hoy?','Borrar'))) return;
   state={checks:{},comment:'',sig:null,name:state.name}; save(); showList(); toast('Checklist reiniciado');
 });
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden) tick(); });
 
 cleanOld();
 showStart();
+if('serviceWorker' in navigator && location.protocol!=='file:'){
+  window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
 })();
 </script>
 </body>
